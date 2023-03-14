@@ -84,6 +84,7 @@ const createWallet = async (
   encryptionKey: string,
   mnemonic: string,
   creationBlockNumbers: Optional<MapType<number>>,
+  index: number = 0,
 ): Promise<RailgunWalletInfo> => {
   const formattedCreationBlockNumbers =
     formatCreationBlockNumbers(creationBlockNumbers);
@@ -92,7 +93,7 @@ const createWallet = async (
   const wallet = await engine.createWalletFromMnemonic(
     encryptionKey,
     mnemonic,
-    0,
+    index,
     formattedCreationBlockNumbers,
   );
   subscribeToBalanceEvents(wallet);
@@ -127,6 +128,33 @@ export const createRailgunWallet = async (
       encryptionKey,
       mnemonic,
       creationBlockNumbers,
+    );
+    const response: LoadRailgunWalletResponse = { railgunWalletInfo };
+    return response;
+  } catch (err) {
+    const sanitizedError = reportAndSanitizeError(
+      createRailgunWallet.name,
+      err,
+    );
+    const response: LoadRailgunWalletResponse = {
+      error: sanitizedError.message,
+    };
+    return response;
+  }
+};
+
+export const createRailgunWalletByIndex = async (
+  encryptionKey: string,
+  mnemonic: string,
+  creationBlockNumbers: Optional<MapType<number>>,
+  index: number,
+): Promise<LoadRailgunWalletResponse> => {
+  try {
+    const railgunWalletInfo = await createWallet(
+      encryptionKey,
+      mnemonic,
+      creationBlockNumbers,
+      index
     );
     const response: LoadRailgunWalletResponse = { railgunWalletInfo };
     return response;
